@@ -38,15 +38,13 @@ Fix it, and only it.
 ## Outcome 2: product defect
 
 **Do not make the test pass.** Leave the test and its assertions untouched. Do not add `test.skip`,
-`test.fixme`, `test.fail`, retries or try/catch. Report the defect and stop. Use this template, in English:
-
-```
-Summary: <generic one-line summary>
-Pre-conditions: <state / data needed>
-Steps: <numbered, reproducible by hand in the real UI>
-Actual: <what the product does, with the trace / screenshot reference>
-Expected: <what the test case says, with the TC row reference>
-```
+`test.fixme`, `test.fail`, retries or try/catch. Report the defect and stop. Write the bug draft to `bugs/BUG-<TC id>-<short-slug>.md`
+following `bugs/TEMPLATE.md` exactly, in English. Read the template first: Summary, Actual Result
+and Expected Result are single passive-voice sentences in the What? Where? When? structure, with
+no speculation about causes. Take Pre-conditions from the test case; you cannot ask the user, so
+write "None" only if the test case lists none. Expected Result comes from the test case, not from
+the live UI. Add the evidence block (TC row, spec file, trace / screenshot path) below the report.
+Do not touch any other file.
 
 ## Outcome 3: unclear
 
@@ -72,4 +70,4 @@ When you ask a question, the user may not be watching: put the question in your 
 1. Classification (test defect / product defect / unclear) and the evidence.
 2. Files changed (path and what), or "none".
 3. The real result of the verification run, copied from the output.
-4. For a product defect: the bug draft above.
+4. For a product defect: the path of the bug draft in `bugs/`.
