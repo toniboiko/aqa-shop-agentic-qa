@@ -11,3 +11,6 @@ node_modules/
 .env
 .continue/
 .continue/
+
+# Playwright MCP artifacts
+.playwright-mcp/
