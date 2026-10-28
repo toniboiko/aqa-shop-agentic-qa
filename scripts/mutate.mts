@@ -2,16 +2,21 @@ import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { join } from "node:path";
 
-// Mutation check: for every `name: "..."` string in pages/*.ts, break the
-// expected value, run the suite and require it to fail ON that value.
-// A mutation that leaves the suite green means the assertion proves nothing.
+// Mutation check: break one expected value at a time, run the suite and
+// require it to fail ON that value. A mutation that leaves the suite green
+// means the assertion proves nothing.
+// Targets: `name: "..."` locator names in pages/*.ts and every
+// `key: "..."` string literal in test-data/*.ts (expected values).
 
-const PAGES_DIR = "pages";
 const SUFFIX = "__MUTATED__";
-const NAME_LITERAL = /(name:\s*)"((?:[^"\\]|\\.)*)"/g;
+const TARGETS = [
+  { dir: "pages", literal: /(name:\s*)"((?:[^"\\]|\\.)*)"/g },
+  { dir: "test-data", literal: /(\b\w+:\s*)"((?:[^"\\]|\\.)*)"/g },
+];
 
 type Mutation = {
   file: string;
+  literal: RegExp;
   original: string;
   mutated: string;
   index: number;
@@ -31,18 +36,21 @@ function runSuite(): { status: number; output: string } {
 
 function collectMutations(): Mutation[] {
   const mutations: Mutation[] = [];
-  for (const entry of readdirSync(PAGES_DIR)) {
-    if (!entry.endsWith(".ts")) continue;
-    const file = join(PAGES_DIR, entry);
-    const source = readFileSync(file, "utf8");
-    let index = 0;
-    for (const match of source.matchAll(NAME_LITERAL)) {
-      mutations.push({
-        file,
-        original: match[2],
-        mutated: `${match[2]}${SUFFIX}`,
-        index: index++,
-      });
+  for (const { dir, literal } of TARGETS) {
+    for (const entry of readdirSync(dir)) {
+      if (!entry.endsWith(".ts")) continue;
+      const file = join(dir, entry);
+      const source = readFileSync(file, "utf8");
+      let index = 0;
+      for (const match of source.matchAll(literal)) {
+        mutations.push({
+          file,
+          literal,
+          original: match[2],
+          mutated: `${match[2]}${SUFFIX}`,
+          index: index++,
+        });
+      }
     }
   }
   return mutations;
@@ -50,7 +58,7 @@ function collectMutations(): Mutation[] {
 
 function applyMutation(source: string, mutation: Mutation): string {
   let current = 0;
-  return source.replace(NAME_LITERAL, (whole, prefix: string) => {
+  return source.replace(mutation.literal, (whole, prefix: string) => {
     return current++ === mutation.index
       ? `${prefix}"${mutation.mutated}"`
       : whole;
@@ -84,7 +92,7 @@ if (baseline.status !== 0) {
 const mutations = collectMutations();
 if (mutations.length === 0) {
   console.error(
-    `No mutation targets found in ${PAGES_DIR}/. Zero mutations is not a pass.`,
+    `No mutation targets found in ${TARGETS.map((t) => t.dir).join(", ")}. Zero mutations is not a pass.`,
   );
   process.exit(1);
 }
