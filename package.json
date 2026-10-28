@@ -7,6 +7,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "playwright test",
+    "mutate": "node scripts/mutate.mts",
     "precommit": "npm run typecheck && npm run lint",
     "check": "npm run typecheck && npm run lint && playwright test --list && npm test"
   },
