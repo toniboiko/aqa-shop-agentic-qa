@@ -1,3 +1,14 @@
 #!/bin/bash
 set -e
 npm run precommit
+
+# Mutation check runs only when the commit touches tests, pages or test data.
+# mutate.mts edits files on disk, so the working tree must match the index.
+WATCHED='^(tests|pages|test-data)/'
+if git diff --cached --name-only | grep -qE "$WATCHED"; then
+  if ! git diff --quiet -- tests pages test-data; then
+    echo "Unstaged changes in tests/, pages/ or test-data/. Stage or stash them, then commit again." >&2
+    exit 1
+  fi
+  npm run mutate
+fi
