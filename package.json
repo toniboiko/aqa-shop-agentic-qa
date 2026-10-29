@@ -8,6 +8,8 @@
     "lint": "eslint .",
     "test": "playwright test",
     "mutate": "node scripts/mutate.mts",
+    "review:save": "node scripts/review-gate.mjs save",
+    "review:check": "node scripts/review-gate.mjs check",
     "precommit": "npm run typecheck && npm run lint",
     "check": "npm run typecheck && npm run lint && playwright test --list && npm test"
   },
