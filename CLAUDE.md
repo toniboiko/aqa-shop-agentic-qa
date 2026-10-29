@@ -27,7 +27,10 @@ Use import/export only. require() is forbidden.
   page.locator() calls in specs. Page Objects expose their locators so specs
   can assert on them.
 - Import Page Objects at the top of the spec and instantiate them inside the test:
-  const loginPage = new LoginPage(page). Not fixtures, not static methods.
+  const loginPage = new LoginPage(page). Page Objects are not provided via fixtures, and not via static methods.
+- Fixtures are allowed only for setup that must run before the test (before-setup): preparing
+  state, data or session. A fixture must not provide Page Objects, perform the steps under test,
+  or contain assertions. Fixtures live in fixtures/ and must not share state between tests.
 - Test titles describe business behavior:
   test('user cannot log in with an invalid password').
 - Do not invent selectors. Inspect the real DOM first.
