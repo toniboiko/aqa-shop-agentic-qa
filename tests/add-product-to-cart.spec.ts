@@ -1,5 +1,5 @@
 // TC-003
-// spec: specs/TC-003-add-product-to-cart.md
+// spec: test-cases/TC-003-add-product-to-cart.md
 // seed: tests/seed.spec.ts
 
 import { test, expect } from "@playwright/test";
@@ -10,7 +10,9 @@ import { validUser } from "../test-data/login";
 import { cartExpectations } from "../test-data/cart";
 
 test.describe("TC-003 Add product to cart", () => {
-  test("user adds one product to the cart", async ({ page }) => {
+  test("user adds the first available product to the cart", async ({
+    page,
+  }) => {
     const loginPage = new LoginPage(page);
     const shopPage = new ShopPage(page);
     const cartPage = new CartPage(page);
@@ -19,15 +21,18 @@ test.describe("TC-003 Add product to cart", () => {
     await loginPage.goto();
     await loginPage.login(validUser.email, validUser.password);
 
-    // 1. User is on the Welcome to Our Shop page
+    // 1. User is on the Welcome to Our Shop page, the cart is empty
     await expect(shopPage.heading).toBeVisible();
+    await expect(
+      shopPage.cartLinkWithCount(cartExpectations.initialQuantity),
+    ).toBeVisible();
 
-    // 2. Save the name and price for Leather Wallet product
-    const savedName = await shopPage.leatherWalletName.innerText();
-    const savedPrice = await shopPage.leatherWalletPrice.innerText();
+    // 2. Save the name and price of the first product in the list
+    const savedName = await shopPage.firstProductName.innerText();
+    const savedPrice = await shopPage.firstProductPrice.innerText();
 
-    // 3. Click Add to Cart button for Leather Wallet product (one product)
-    await shopPage.leatherWalletAddToCartButton.click();
+    // 3. Click Add to Cart for that product (one product)
+    await shopPage.firstProductAddToCartButton.click();
     await expect(
       shopPage.message(cartExpectations.processingText),
     ).toBeVisible();
@@ -39,15 +44,14 @@ test.describe("TC-003 Add product to cart", () => {
     await shopPage.cartLink.click();
     await expect(cartPage.heading).toBeVisible();
 
-    // 5. Check the product in the cart
-    await expect(cartPage.leatherWalletName).toBeVisible();
+    // 5. Check the saved product is in the cart
+    await expect(cartPage.productName).toHaveText(savedName);
 
-    // 6. Check product price and name
-    await expect(cartPage.leatherWalletName).toHaveText(savedName);
-    await expect(cartPage.leatherWalletPrice).toHaveText(savedPrice);
+    // 6. Check product price
+    await expect(cartPage.productPrice).toHaveText(savedPrice);
 
     // 7. Check product quantity
-    await expect(cartPage.leatherWalletQuantity).toHaveText(
+    await expect(cartPage.productQuantity).toHaveText(
       cartExpectations.quantityText,
     );
   });
