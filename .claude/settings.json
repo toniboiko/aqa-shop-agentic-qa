@@ -1,4 +1,12 @@
 {
+  "permissions": {
+    "deny": [
+      "Edit(test-cases/**)",
+      "Write(test-cases/**)",
+      "MultiEdit(test-cases/**)",
+      "NotebookEdit(test-cases/**)"
+    ]
+  },
   "hooks": {
     "PostToolUse": [
       {
