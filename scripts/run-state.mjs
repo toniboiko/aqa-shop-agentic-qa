@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 
 // Run state for the aqa-orchestrator agent.
-//   node scripts/run-state.mjs <init|show|stage|bump|stop> TC-xxx [arg]
+//   node scripts/run-state.mjs <init|show|stage|bump|stop|resume> TC-xxx [arg]
 // State lives in runs/<TC-id>.json. Exit codes: 0 ok, 1 error, 2 a loop limit was exceeded.
 
 export const STAGES = ["plan", "write", "check", "heal", "mutate", "review", "final"];
@@ -48,6 +48,14 @@ export const setStage = (tc, stage, dir = "runs") => {
 export const stop = (tc, reason, dir = "runs") =>
   write({ ...loadState(tc, dir), status: "stopped", stopReason: reason }, dir);
 
+// Reopens a stopped run. Counters are kept unless the human names one to reset.
+export const resume = (tc, counter, dir = "runs") => {
+  if (counter !== undefined && !(counter in LIMITS)) throw new Error(`Unknown counter "${counter}". Expected heal or rework.`);
+  const state = loadState(tc, dir);
+  if (counter !== undefined) state.counters[counter] = 0;
+  return write({ ...state, status: "running", stopReason: null }, dir);
+};
+
 export const bump = (tc, counter, dir = "runs") => {
   if (!(counter in LIMITS)) throw new Error(`Unknown counter "${counter}". Expected heal or rework.`);
   const state = loadState(tc, dir);
@@ -66,6 +74,7 @@ const main = () => {
     if (command === "init") console.log(JSON.stringify(initState(tc)));
     else if (command === "show") console.log(JSON.stringify(loadState(tc), null, 2));
     else if (command === "stage") console.log(JSON.stringify(setStage(tc, arg)));
+    else if (command === "resume") console.log(JSON.stringify(resume(tc, arg)));
     else if (command === "stop") console.log(JSON.stringify(stop(tc, arg ?? "stopped")));
     else if (command === "bump") {
       const { state, exceeded } = bump(tc, arg);
@@ -75,7 +84,7 @@ const main = () => {
         process.exit(2);
       }
     } else {
-      throw new Error("Usage: node scripts/run-state.mjs <init|show|stage|bump|stop> TC-xxx [arg]");
+      throw new Error("Usage: node scripts/run-state.mjs <init|show|stage|bump|stop|resume> TC-xxx [arg]");
     }
   } catch (error) {
     console.error(error.message);

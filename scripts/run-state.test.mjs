@@ -4,7 +4,7 @@ import { existsSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { test } from "node:test";
-import { bump, initState, loadState, setStage, stop } from "./run-state.mjs";
+import { bump, initState, loadState, resume, setStage, stop } from "./run-state.mjs";
 
 const script = resolve("scripts/run-state.mjs");
 const freshDir = () => mkdtempSync(join(tmpdir(), "run-state-"));
@@ -87,4 +87,34 @@ test("cli exits 2 when a limit is exceeded", () => {
   assert.equal(shown.status, 0);
   assert.equal(JSON.parse(shown.stdout).status, "stopped");
   assert.equal(cli(dir, "init", "../x").status, 1);
+});
+
+test("resume reopens a stopped run and keeps the counters", () => {
+  const dir = freshDir();
+  initState("TC-003", dir);
+  bump("TC-003", "heal", dir);
+  stop("TC-003", "product defect", dir);
+  const state = resume("TC-003", undefined, dir);
+  assert.equal(state.status, "running");
+  assert.equal(state.stopReason, null);
+  assert.equal(state.counters.heal, 1);
+});
+
+test("resume with a counter name resets only that counter", () => {
+  const dir = freshDir();
+  initState("TC-003", dir);
+  [1, 2, 3].forEach(() => bump("TC-003", "heal", dir));
+  bump("TC-003", "rework", dir);
+  const state = resume("TC-003", "heal", dir);
+  assert.deepEqual(state.counters, { heal: 0, rework: 1 });
+  assert.equal(state.status, "running");
+  assert.throws(() => resume("TC-003", "foo", dir));
+});
+
+test("cli resume lets a stopped run continue", () => {
+  const dir = freshDir();
+  cli(dir, "init", "TC-003");
+  cli(dir, "stop", "TC-003", "product defect");
+  assert.equal(cli(dir, "resume", "TC-003").status, 0);
+  assert.equal(JSON.parse(cli(dir, "show", "TC-003").stdout).status, "running");
 });
