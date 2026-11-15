@@ -14,3 +14,7 @@ node_modules/
 
 # Playwright MCP artifacts
 .playwright-mcp/
+
+# Orchestrator state
+/runs/
+.superpowers/

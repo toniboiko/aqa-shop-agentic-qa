@@ -7,6 +7,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "playwright test",
+    "test:scripts": "node --test scripts/*.test.mjs",
     "mutate": "node scripts/mutate.mts",
     "review:save": "node scripts/review-gate.mjs save",
     "review:check": "node scripts/review-gate.mjs check",
