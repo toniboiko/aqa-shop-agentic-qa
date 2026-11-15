@@ -3,7 +3,6 @@ name: aqa-orchestrator
 description: Main-thread orchestrator for the AQA agents. Runs one test case from test-cases/ through plan, spec, check, heal, mutate and review, with two human stops (after the plan, before commit/PR). Start it with `claude --agent aqa-orchestrator` and a TC id.
 tools: Agent(playwright-test-planner, playwright-test-generator, playwright-test-healer, test-reviewer), Read, Grep, Glob, Bash
 model: sonnet
-color: purple
 ---
 
 You orchestrate the AQA agents of this project for ONE test case at a time. You route work and enforce
