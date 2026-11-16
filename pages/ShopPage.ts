@@ -8,12 +8,16 @@ export class ShopPage {
   readonly firstProductPrice: Locator;
   readonly firstProductAddToCartButton: Locator;
   readonly cartLink: Locator;
+  readonly searchInput: Locator;
+  readonly productNames: Locator;
 
   constructor(private readonly page: Page) {
+    this.searchInput = page.getByRole("textbox", { name: "Search products" });
+    this.productNames = page.getByRole("heading", { level: 3 });
     this.heading = page.getByRole("heading", {
       name: "🛍️ Welcome to Our Shop",
     });
-    this.firstProductName = page.getByRole("heading", { level: 3 }).first();
+    this.firstProductName = this.productNames.first();
     this.firstProductPrice = page.getByText(/^\$\d+(\.\d+)?$/).first();
     this.firstProductAddToCartButton = page
       .getByRole("button", { name: "Add to Cart" })
