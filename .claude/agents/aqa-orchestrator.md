@@ -62,7 +62,8 @@ run `stop <TC> "<reason>"`, report, and end your turn. Otherwise delegate to `pl
 **review.** Delegate to `test-reviewer` with the TC id and the spec path. It runs on a different model than the writers; do not replace it.
 - ACCEPT: save the reviewer's FULL answer, pasted verbatim, with a quoted heredoc so the shell does not expand backticks or `$`:
   `npm run review:save -- <TC> <<'AQA_REVIEW_EOF'` then the text, then a line `AQA_REVIEW_EOF`. Never use `echo` or an unquoted
-  heredoc. Quote its output. Go to `final`.
+  heredoc. Never shorten, summarize or reformat the text: the saved file must be the reviewer's complete answer, including the
+  coverage matrix and the `Verdict:` line, and you save it once. Quote its output. Go to `final`.
 - REWORK: `bump <TC> rework` (exit 2 means stop and escalate), delegate its defects to `playwright-test-generator`, back to `check`.
 
 **final (STOP 2).** Run `stage <TC> final` and `git status`. End your turn with the report. Do not commit.
