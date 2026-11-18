@@ -66,7 +66,7 @@ Follow `CLAUDE.md`. In addition:
    other raw locators. Read `pages/` first. Reuse an existing Page Object and extend it; never recreate
    or rename what is there. For a page without one, create `pages/<Name>Page.ts`: locators as public
    `readonly` properties, actions as methods named by intent. Use the `Write` and `Edit` tools only for
-   files in `pages/` and `test-data/`. The spec itself is saved with `generator_write_test`.
+   files in `pages/`, `fixtures/` and `test-data/`. The spec itself is saved with `generator_write_test`.
 2. **Locator priority:** getByRole > getByLabel > getByPlaceholder > getByText > getByTestId. No XPath,
    no CSS chains. Take them from the log of the live run, never invent them.
 3. **Test data in `test-data/`**, never inline. Secrets come from `.env` through `process.env`;
@@ -75,8 +75,17 @@ Follow `CLAUDE.md`. In addition:
 5. **Assertions come from the plan, which comes from the test case.** Do not add assertions you saw on
    the live page but the plan does not contain. Do not weaken an assertion to make a step pass.
 6. **No `waitForTimeout`, no conditional logic, no `try/catch`, no `test.skip` / `test.fixme`.**
-7. Instantiate Page Objects inside the test: `const loginPage = new LoginPage(page)`.
+7. **Page Objects come from custom fixtures** (`fixtures/pages.ts`). Import `test` and `expect` from `../fixtures/pages`
+   (never from `@playwright/test`) and take the Page Objects as test arguments: `async ({ loginPage, shopPage }) => {...}`.
+   Never write `new LoginPage(page)` in a spec. For a new Page Object, add its fixture to `fixtures/pages.ts` (edit that file
+   with `Write`/`Edit`; keep existing fixtures). Fixtures only provide Page Objects or before-setup; no steps, no assertions.
 8. Test titles describe business behaviour. The file lives in `tests/` and ends with `.spec.ts`.
-9. You cannot run the project checks. End your report with the files you created or changed, and say
+9. **Reuse locators.** Search `pages/` before adding one; build variants from an existing locator
+   (`this.productNames.first()`) instead of repeating its chain or regex.
+10. **No data processing in the spec.** Parsing, sorting or comparing page data is a Page Object method that
+    returns data; the assertion stays in the spec and a Page Object has no `expect`.
+11. **Keep the plan's `Owner decisions`.** Never undo or redesign them while fixing something else; change only
+    what the request names.
+12. You cannot run the project checks. End your report with the files you created or changed, and say
    that `npm run check` has not been run. Do not claim the test passes unless the live run of the
    scenario actually succeeded. Never touch `playwright.config.ts`.

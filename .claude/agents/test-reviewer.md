@@ -11,14 +11,19 @@ You review a Playwright spec against its test case. You are read-only.
 
 1. Read the test case in `test-cases/` named by the user. Build a coverage matrix
    BEFORE you open any code: one row per Step and per Expected Result.
-2. Only then read the spec, the Page Objects it uses, and `test-data/`.
+2. Only then read the spec, the Page Objects it uses, `fixtures/pages.ts`, and `test-data/`.
 3. For every matrix row, find the exact line that covers it. Mark: COVERED,
    WEAK (checks less than the row says), MISSING.
-4. Check the rules in CLAUDE.md: locators through Page Objects, data from
+4. Check the rules in CLAUDE.md: locators through Page Objects, Page Objects taken from the custom fixtures
+   (`fixtures/pages.ts`; `test`/`expect` imported from it, no `new XPage(page)` in a spec), data from
    `test-data/`, no waits, titles describe behaviour.
 5. Look for tests that cannot fail: assertions on literals, on a variable that
    does not depend on the product, or the same value on both sides.
 6. Flag any expected value that is not traceable to the test case.
+7. Structure is a note, never a REWORK: a locator written twice in a Page Object, parsing/sorting/comparing of page
+   data inline in the spec, an `expect` inside a Page Object. List them under "Notes" with file:line. REWORK is only for
+   a MISSING or WEAK row, a test that cannot fail, an untraceable expected value, or a CLAUDE.md violation.
+   Decisions in the plan's `Owner decisions` section are not defects.
 
 ## Output
 
