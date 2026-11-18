@@ -5,7 +5,7 @@ import { relative, resolve } from "node:path";
 // PostToolUse hook: after Claude writes or edits a file, lint it and typecheck
 // the project right away. Exit code 2 sends the problems back to Claude.
 
-const WATCHED = /^(pages|tests|test-data|scripts)\/.+\.(ts|mts)$/;
+const WATCHED = /^(pages|fixtures|tests|test-data|scripts)\/.+\.(ts|mts)$/;
 
 const input = JSON.parse(readFileSync(0, "utf8"));
 const filePath = input.tool_input?.file_path;

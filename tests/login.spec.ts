@@ -1,10 +1,7 @@
 // TC-001
-import { test, expect } from "@playwright/test";
-import { LoginPage } from "../pages/LoginPage";
+import { test, expect } from "../fixtures/pages";
 
-test("login page displays the login form", async ({ page }) => {
-  const loginPage = new LoginPage(page);
-
+test("login page displays the login form", async ({ loginPage }) => {
   await loginPage.goto();
 
   await expect(loginPage.heading).toBeVisible();

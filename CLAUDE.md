@@ -26,11 +26,13 @@ Use import/export only. require() is forbidden.
 - Page interaction goes through Page Objects only. No raw locators in specs — this means no
   page.locator() calls in specs. Page Objects expose their locators so specs
   can assert on them.
-- Import Page Objects at the top of the spec and instantiate them inside the test:
-  const loginPage = new LoginPage(page). Page Objects are not provided via fixtures, and not via static methods.
-- Fixtures are allowed only for setup that must run before the test (before-setup): preparing
-  state, data or session. A fixture must not provide Page Objects, perform the steps under test,
-  or contain assertions. Fixtures live in fixtures/ and must not share state between tests.
+- Page Objects are provided to specs by custom fixtures (fixtures/pages.ts). Import `test` and `expect`
+  from "../fixtures/pages", not from "@playwright/test", and take the Page Objects as test arguments:
+  test("...", async ({ loginPage, shopPage }) => { ... }). Never write `new LoginPage(page)` in a spec,
+  and do not provide Page Objects via static methods. A new Page Object gets a fixture in fixtures/pages.ts.
+- A fixture may provide Page Objects and do setup that must run before the test (before-setup): preparing
+  state, data or session. A fixture must not perform the steps under test or contain assertions.
+  Fixtures live in fixtures/ and must not share state between tests.
 - Test titles describe business behavior:
   test('user cannot log in with an invalid password').
 - Do not invent selectors. Inspect the real DOM first.

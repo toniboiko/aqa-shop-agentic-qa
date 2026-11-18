@@ -36,7 +36,7 @@ A run of clicks and fills that serves one purpose is one method. A method that n
 as an argument instead of hardcoding it.
 
 
-**The spec** is rewritten to instantiate the Page Objects and call those methods, so it reads as a
+**The spec** is rewritten to take the Page Objects from the custom fixtures (`fixtures/pages.ts`, add a fixture for each new Page Object; import `test`/`expect` from it) and call their methods, so it reads as a
 sequence of business steps. Add the imports it now needs, with paths relative to the spec's folder.
 Assertions stay in the spec.
 

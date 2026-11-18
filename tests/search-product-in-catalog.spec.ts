@@ -2,18 +2,14 @@
 // spec: specs/TC-004-search-product-in-catalog.md
 // seed: tests/seed.spec.ts
 
-import { test, expect } from "@playwright/test";
-import { LoginPage } from "../pages/LoginPage";
-import { ShopPage } from "../pages/ShopPage";
+import { test, expect } from "../fixtures/pages";
 import { validUser } from "../test-data/login";
 
 test.describe("TC-004 Search product in catalog", () => {
   test("user finds the searched product by its name in the catalog search", async ({
-    page,
+    loginPage,
+    shopPage,
   }) => {
-    const loginPage = new LoginPage(page);
-    const shopPage = new ShopPage(page);
-
     // Precondition: authenticated user on the Catalog page
     await loginPage.goto();
     await loginPage.login(validUser.email, validUser.password);
