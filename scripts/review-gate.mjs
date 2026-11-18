@@ -6,8 +6,9 @@ import { dirname, join, normalize } from "node:path";
 // Review gate for test-reviewer verdicts.
 //   save <TC-id>   reads the reviewer's answer from stdin, writes reviews/<TC-id>.md
 //   check          pre-push: every TC touched on this branch needs a fresh ACCEPT
+//   status         working tree: fresh / stale / missing / not-accept per TC; exit 1 if any is not fresh
 //
-// A spec is tied to its test case by a `// TC-003` line at the top of the file.
+// A spec is tied to its test cases by `// TC-003` lines at the top of the file (one line per test case).
 // A verdict is fresh while the sha256 of the test case, its specs and everything
 // they import locally (Page Objects, test-data) is unchanged.
 
@@ -24,8 +25,8 @@ const fail = (message) => {
   process.exit(1);
 };
 
-const tcOf = (specPath) =>
-  readFileSync(specPath, "utf8").match(/^\/\/\s*(TC-\d+)\s*$/m)?.[1];
+const tcsOf = (specPath) =>
+  [...readFileSync(specPath, "utf8").matchAll(/^\/\/\s*(TC-\d+)\s*$/gm)].map((m) => m[1]);
 
 const listSpecs = () =>
   readdirSync(SPEC_DIR)
@@ -70,9 +71,9 @@ const hashOf = (files) => {
 const specsByTc = () => {
   const map = new Map();
   for (const spec of listSpecs()) {
-    const tc = tcOf(spec);
-    if (!tc) fail(`${spec} has no "// TC-xxx" line at the top. Add it, or exclude the spec in review-gate.mjs.`);
-    map.set(tc, [...(map.get(tc) ?? []), spec]);
+    const tcs = tcsOf(spec);
+    if (tcs.length === 0) fail(`${spec} has no "// TC-xxx" line at the top. Add it, or exclude the spec in review-gate.mjs.`);
+    for (const tc of tcs) map.set(tc, [...(map.get(tc) ?? []), spec]);
   }
   return map;
 };
@@ -93,6 +94,22 @@ const save = (tc) => {
   console.log(`${REVIEW_DIR}/${tc}.md saved: ${verdict}`);
 };
 
+// State of one test case's verdict: fresh, missing, not-accept or stale.
+const verdictState = (tc, specs) => {
+  const reviewFile = join(REVIEW_DIR, `${tc}.md`);
+  if (!existsSync(reviewFile)) return "missing";
+  const review = readFileSync(reviewFile, "utf8");
+  if (review.match(/^Verdict:\s*(\w+)/m)?.[1] !== "ACCEPT") return "not-accept";
+  if (review.match(/^Reviewed:\s*(\w+)/m)?.[1] !== hashOf(dependencies(tc, specs))) return "stale";
+  return "fresh";
+};
+
+const PROBLEM_TEXT = {
+  missing: (tc) => `${tc}: no ${join(REVIEW_DIR, `${tc}.md`)}`,
+  "not-accept": (tc) => `${tc}: verdict is not ACCEPT`,
+  stale: (tc) => `${tc}: code changed after the review`,
+};
+
 const check = () => {
   const base = git("merge-base", "HEAD", "origin/main");
   if (base.status !== 0) {
@@ -107,18 +124,8 @@ const check = () => {
   for (const [tc, specs] of specsByTc()) {
     const files = dependencies(tc, specs);
     if (!files.some((f) => changed.includes(f))) continue;
-
-    const reviewFile = join(REVIEW_DIR, `${tc}.md`);
-    if (!existsSync(reviewFile)) {
-      problems.push(`${tc}: no ${reviewFile}`);
-      continue;
-    }
-    const review = readFileSync(reviewFile, "utf8");
-    if (review.match(/^Verdict:\s*(\w+)/m)?.[1] !== "ACCEPT") {
-      problems.push(`${tc}: verdict is not ACCEPT`);
-    } else if (review.match(/^Reviewed:\s*(\w+)/m)?.[1] !== hashOf(files)) {
-      problems.push(`${tc}: code changed after the review`);
-    }
+    const state = verdictState(tc, specs);
+    if (state !== "fresh") problems.push(PROBLEM_TEXT[state](tc));
   }
 
   if (problems.length > 0) {
@@ -129,7 +136,20 @@ const check = () => {
   }
 };
 
+// Working-tree view, no git needed: which test cases need a review right now.
+// Exit 1 when any test case is not fresh.
+const status = () => {
+  let needReview = false;
+  for (const [tc, specs] of specsByTc()) {
+    const state = verdictState(tc, specs);
+    console.log(`${tc}: ${state}`);
+    if (state !== "fresh") needReview = true;
+  }
+  if (needReview) process.exit(1);
+};
+
 const [command, arg] = process.argv.slice(2);
 if (command === "save") save(arg);
 else if (command === "check") check();
-else fail("Usage: review-gate.mjs save <TC-id> | check");
+else if (command === "status") status();
+else fail("Usage: review-gate.mjs save <TC-id> | check | status");

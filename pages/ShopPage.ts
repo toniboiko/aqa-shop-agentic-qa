@@ -47,15 +47,18 @@ export class ShopPage {
   async pricesOrder(): Promise<{
     prices: number[];
     sortedDescending: boolean;
+    sortedAscending: boolean;
     notEmpty: boolean;
   }> {
     const prices = (await this.productPrices.allTextContents()).map(
       parsePrice,
     );
     const sortedDesc = [...prices].sort((a, b) => b - a);
+    const sortedAsc = [...prices].sort((a, b) => a - b);
     return {
       prices,
       sortedDescending: prices.join() === sortedDesc.join(),
+      sortedAscending: prices.join() === sortedAsc.join(),
       notEmpty: prices.length > 0,
     };
   }
