@@ -2,21 +2,16 @@
 // spec: test-cases/TC-003-add-product-to-cart.md
 // seed: tests/seed.spec.ts
 
-import { test, expect } from "@playwright/test";
-import { LoginPage } from "../pages/LoginPage";
-import { ShopPage } from "../pages/ShopPage";
-import { CartPage } from "../pages/CartPage";
+import { test, expect } from "../fixtures/pages";
 import { validUser } from "../test-data/login";
 import { cartExpectations } from "../test-data/cart";
 
 test.describe("TC-003 Add product to cart", () => {
   test("user adds the first product from the list to the cart", async ({
-    page,
+    loginPage,
+    shopPage,
+    cartPage,
   }) => {
-    const loginPage = new LoginPage(page);
-    const shopPage = new ShopPage(page);
-    const cartPage = new CartPage(page);
-
     // Precondition: authenticated user
     await loginPage.goto();
     await loginPage.login(validUser.email, validUser.password);

@@ -2,16 +2,15 @@
 // spec: specs/TC-002-login-valid.md
 // seed: tests/seed.spec.ts
 
-import { test, expect } from "@playwright/test";
-import { LoginPage } from "../pages/LoginPage";
-import { ShopPage } from "../pages/ShopPage";
+import { test, expect } from "../fixtures/pages";
 import { validUser, expectedUrls } from "../test-data/login";
 
 test.describe("TC-002 Login with valid credentials", () => {
-  test("user can log in with valid credentials", async ({ page }) => {
-    const loginPage = new LoginPage(page);
-    const shopPage = new ShopPage(page);
-
+  test("user can log in with valid credentials", async ({
+    page,
+    loginPage,
+    shopPage,
+  }) => {
     // 1. Navigate to /login
     await loginPage.goto();
 

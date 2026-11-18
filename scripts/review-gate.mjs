@@ -16,7 +16,7 @@ const SPEC_DIR = "tests";
 const CASE_DIR = "test-cases";
 const REVIEW_DIR = "reviews";
 const EXCLUDED_SPECS = new Set(["seed.spec.ts"]);
-const WATCHED = /^(tests|pages|test-data|test-cases)\//;
+const WATCHED = /^(tests|pages|fixtures|test-data|test-cases)\//;
 
 const git = (...args) => spawnSync("git", args, { encoding: "utf8" });
 

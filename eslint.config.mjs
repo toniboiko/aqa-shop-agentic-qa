@@ -12,7 +12,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ["tests/**/*.ts", "pages/**/*.ts"],
+    files: ["tests/**/*.ts", "pages/**/*.ts", "fixtures/**/*.ts"],
     rules: {
       "no-restricted-properties": [
         "error",

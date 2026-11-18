@@ -3,19 +3,15 @@
 // spec: specs/TC-005-filter-price-high-to-lower.md
 // seed: tests/seed.spec.ts
 
-import { test, expect } from "@playwright/test";
-import { LoginPage } from "../pages/LoginPage";
-import { ShopPage } from "../pages/ShopPage";
+import { test, expect } from "../fixtures/pages";
 import { validUser } from "../test-data/login";
 import { sortOptions, expectedSortOptionCount } from "../test-data/sort";
 
 test.describe("Catalog price sorting", () => {
   test("user sorts the catalog products by price from high to low", async ({
-    page,
+    loginPage,
+    shopPage,
   }) => {
-    const loginPage = new LoginPage(page);
-    const shopPage = new ShopPage(page);
-
     // 1. Precondition: authenticated user on the Catalog page
     await loginPage.goto();
     await loginPage.login(validUser.email, validUser.password);
@@ -59,11 +55,9 @@ test.describe("Catalog price sorting", () => {
   });
 
   test("user resets the catalog price sorting back to low to high", async ({
-    page,
+    loginPage,
+    shopPage,
   }) => {
-    const loginPage = new LoginPage(page);
-    const shopPage = new ShopPage(page);
-
     // 1. Precondition: authenticated user on the Catalog page
     await loginPage.goto();
     await loginPage.login(validUser.email, validUser.password);
